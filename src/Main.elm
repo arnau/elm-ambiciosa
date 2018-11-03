@@ -2,6 +2,7 @@ module Main exposing (Model, Msg(..), init, main, subscriptions, update, view)
 
 import Browser
 import Dice exposing (Face(..))
+import Hand exposing (Hand)
 import Html exposing (..)
 import Html.Attributes as At
 import Html.Events exposing (..)
@@ -26,13 +27,13 @@ main =
 
 
 type alias Model =
-    { dieFace : Face
+    { hand : Hand
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model Ace
+    ( { hand = Hand.empty }
     , Cmd.none
     )
 
@@ -43,7 +44,7 @@ init _ =
 
 type Msg
     = Roll
-    | NewFace Dice.Face
+    | NewHand Hand.Hand
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -51,11 +52,11 @@ update msg model =
     case msg of
         Roll ->
             ( model
-            , Random.generate NewFace Dice.roll
+            , Random.generate NewHand Hand.roll
             )
 
-        NewFace newFace ->
-            ( Model newFace
+        NewHand newHand ->
+            ( { model | hand = newHand }
             , Cmd.none
             )
 
@@ -76,6 +77,23 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ div [ At.style "font-size" "100px" ] [ text (Dice.toString model.dieFace) ]
+        [ handView model.hand
         , button [ onClick Roll ] [ text "Roll" ]
         ]
+
+
+handView : Hand -> Html Msg
+handView hand =
+    div [ At.style "font-size" "100px" ]
+        (case hand of
+            Hand.None ->
+                [ text "No hand" ]
+
+            Hand.Hand a b c ->
+                [ text (Dice.toString a)
+                , text (Dice.toString b)
+                , text (Dice.toString c)
+                , text " = "
+                , text (String.fromInt (Hand.toScore hand))
+                ]
+        )

@@ -10,37 +10,43 @@ type alias Score =
 type Face
     = Ace
     | King
-    | Three
-    | Four
-    | Five
-    | Six
+    | Queen
+    | Jack
+    | Nine
+    | Eight
 
 
 roll : Random.Generator Face
 roll =
-    Random.uniform Ace [ King, Three, Four, Five, Six ]
+    Random.uniform Ace [ King, Queen, Jack, Nine, Eight ]
 
 
 toString : Face -> String
 toString face =
     case face of
         Ace ->
-            "⚀"
+            -- "⚀"
+            "🂡"
 
         King ->
-            "⚁"
+            -- "⚁"
+            "🂮"
 
-        Three ->
-            "⚂"
+        Queen ->
+            -- "⚂"
+            "🂭"
 
-        Four ->
-            "⚃"
+        Jack ->
+            -- "⚃"
+            "🂫"
 
-        Five ->
-            "⚄"
+        Nine ->
+            -- "⚄"
+            "🂩"
 
-        Six ->
-            "⚅"
+        Eight ->
+            -- "⚅"
+            "🂨"
 
 
 toInt : Face -> Int
@@ -52,16 +58,16 @@ toInt face =
         King ->
             2
 
-        Three ->
+        Queen ->
             3
 
-        Four ->
+        Jack ->
             4
 
-        Five ->
+        Nine ->
             5
 
-        Six ->
+        Eight ->
             6
 
 
