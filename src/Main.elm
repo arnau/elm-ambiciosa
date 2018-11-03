@@ -1,7 +1,9 @@
 module Main exposing (Model, Msg(..), init, main, subscriptions, update, view)
 
 import Browser
+import Dice exposing (Face(..))
 import Html exposing (..)
+import Html.Attributes as At
 import Html.Events exposing (..)
 import Random
 
@@ -24,13 +26,13 @@ main =
 
 
 type alias Model =
-    { dieFace : Int
+    { dieFace : Face
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 1
+    ( Model Ace
     , Cmd.none
     )
 
@@ -41,7 +43,7 @@ init _ =
 
 type Msg
     = Roll
-    | NewFace Int
+    | NewFace Dice.Face
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -49,7 +51,7 @@ update msg model =
     case msg of
         Roll ->
             ( model
-            , Random.generate NewFace (Random.int 1 6)
+            , Random.generate NewFace Dice.roll
             )
 
         NewFace newFace ->
@@ -74,6 +76,6 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ h1 [] [ text (String.fromInt model.dieFace) ]
+        [ div [ At.style "font-size" "100px" ] [ text (Dice.toString model.dieFace) ]
         , button [ onClick Roll ] [ text "Roll" ]
         ]
