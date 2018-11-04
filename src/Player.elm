@@ -26,7 +26,15 @@ name (Player state) =
 
 score : Player -> Score
 score (Player { trail }) =
-    List.sum trail
+    let
+        sumif x acc =
+            if x >= 0 then
+                x + acc
+
+            else
+                x
+    in
+    List.foldr sumif 0 trail
 
 
 record : Score -> Player -> Player

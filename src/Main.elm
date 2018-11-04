@@ -80,9 +80,19 @@ update msg model =
             )
 
         NewHand newHand ->
-            ( { model | hand = newHand, game = Game.addHand newHand model.game }
-            , Cmd.none
-            )
+            let
+                game =
+                    Game.addHand newHand model.game
+            in
+            if Hand.toScore newHand == 0 then
+                ( { model | hand = Hand.empty, game = Game.endTurn game }
+                , Cmd.none
+                )
+
+            else
+                ( { model | hand = newHand, game = game }
+                , Cmd.none
+                )
 
         NewPlayer ->
             ( { model | game = Game.addPlayer model.playerInput model.game }
