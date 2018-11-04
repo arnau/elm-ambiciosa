@@ -6,6 +6,8 @@ import Hand exposing (Hand)
 import Html exposing (..)
 import Html.Attributes as At
 import Html.Events exposing (..)
+import Player exposing (Player)
+import PlayerList exposing (PlayerList)
 import Random
 
 
@@ -28,12 +30,17 @@ main =
 
 type alias Model =
     { hand : Hand
+    , players : PlayerList
+    , playerInput : String
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { hand = Hand.empty }
+    ( { hand = Hand.empty
+      , players = PlayerList.empty
+      , playerInput = ""
+      }
     , Cmd.none
     )
 
@@ -45,6 +52,8 @@ init _ =
 type Msg
     = Roll
     | NewHand Hand.Hand
+    | NewPlayer
+    | InputPlayer String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -57,6 +66,16 @@ update msg model =
 
         NewHand newHand ->
             ( { model | hand = newHand }
+            , Cmd.none
+            )
+
+        NewPlayer ->
+            ( { model | players = PlayerList.add (Player model.playerInput) model.players }
+            , Cmd.none
+            )
+
+        InputPlayer input ->
+            ( { model | playerInput = input }
             , Cmd.none
             )
 
@@ -79,6 +98,7 @@ view model =
     div []
         [ handView model.hand
         , button [ onClick Roll ] [ text "Roll" ]
+        , playerListView model
         ]
 
 
@@ -96,4 +116,22 @@ handView hand =
                 , text " = "
                 , text (String.fromInt (Hand.toScore hand))
                 ]
+        )
+
+
+playerListView : Model -> Html Msg
+playerListView model =
+    div []
+        [ input [ At.value model.playerInput, onInput InputPlayer ] []
+        , button [ onClick NewPlayer ] [ text "Add player" ]
+        , playersView model.players
+        ]
+
+
+playersView : PlayerList -> Html Msg
+playersView list =
+    ul []
+        (list
+            |> PlayerList.toList
+            |> List.map (\player -> li [] [ text player.name ])
         )
