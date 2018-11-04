@@ -32,7 +32,7 @@ main =
 type alias Model =
     { hand : Hand
     , game : Game
-    , players : PlayerList
+    , gameStarted : Bool
     , playerInput : String
     }
 
@@ -41,7 +41,7 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( { hand = Hand.empty
       , game = Game.init PlayerList.empty
-      , players = PlayerList.empty
+      , gameStarted = False
       , playerInput = ""
       }
     , Cmd.none
@@ -54,6 +54,8 @@ init _ =
 
 type Msg
     = Roll
+    | EndTurn
+    | StartGame
     | NewHand Hand.Hand
     | NewPlayer
     | InputPlayer String
@@ -62,9 +64,19 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        StartGame ->
+            ( { model | gameStarted = True }
+            , Cmd.none
+            )
+
         Roll ->
             ( model
             , Random.generate NewHand Hand.roll
+            )
+
+        EndTurn ->
+            ( { model | game = Game.endTurn model.game }
+            , Cmd.none
             )
 
         NewHand newHand ->
@@ -98,9 +110,29 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
+    if model.gameStarted then
+        ongoingView model
+
+    else
+        setupView model
+
+
+ongoingView : Model -> Html Msg
+ongoingView model =
     div []
         [ handView model.hand
         , button [ onClick Roll ] [ text "Roll" ]
+        , button [ onClick EndTurn ] [ text "End turn" ]
+        , boardView model
+        ]
+
+
+setupView : Model -> Html Msg
+setupView model =
+    div []
+        [ input [ At.value model.playerInput, onInput InputPlayer ] []
+        , button [ onClick NewPlayer ] [ text "Add player" ]
+        , button [ onClick StartGame ] [ text "Start game" ]
         , boardView model
         ]
 
@@ -125,21 +157,14 @@ handView hand =
 boardView : Model -> Html Msg
 boardView model =
     div []
-        [ input [ At.value model.playerInput, onInput InputPlayer ] []
-        , button [ onClick NewPlayer ] [ text "Add player" ]
-        , scoreView model.game
-        ]
-
-
-scoreView : Game -> Html Msg
-scoreView game =
-    table []
-        [ thead []
-            [ th [] [ text "Name" ]
-            , th [] [ text "Score" ]
-            , th [] [ text "Active" ]
+        [ table []
+            [ thead []
+                [ th [] [ text "Name" ]
+                , th [] [ text "Score" ]
+                , th [] [ text "Active" ]
+                ]
+            , tbody [] (rowsView model.game)
             ]
-        , tbody [] (rowsView game)
         ]
 
 

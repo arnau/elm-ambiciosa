@@ -70,7 +70,7 @@ toList list =
             []
 
         PlayerList { prevList, current, nextList } ->
-            List.map toTuple prevList ++ (( current, True ) :: List.map toTuple nextList)
+            List.map toTuple (List.reverse prevList) ++ (( current, True ) :: List.map toTuple nextList)
 
 
 recycle : PlayerList -> PlayerList
@@ -104,4 +104,4 @@ recycleState { prevList, current, nextList } =
             { prevList = [], current = current, nextList = [] }
 
         newCurr :: newNext ->
-            { prevList = [], current = newCurr, nextList = newNext }
+            { prevList = [], current = newCurr, nextList = newNext ++ [ current ] }
