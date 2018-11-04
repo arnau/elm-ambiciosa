@@ -75,12 +75,12 @@ update msg model =
             )
 
         EndTurn ->
-            ( { model | game = Game.endTurn model.game }
+            ( { model | game = Game.endTurn model.game, hand = Hand.empty }
             , Cmd.none
             )
 
         NewHand newHand ->
-            ( { model | hand = newHand }
+            ( { model | hand = newHand, game = Game.addHand newHand model.game }
             , Cmd.none
             )
 

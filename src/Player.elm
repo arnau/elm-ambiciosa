@@ -1,4 +1,4 @@
-module Player exposing (Player, init, name, score)
+module Player exposing (Player, init, name, record, score)
 
 import Dice exposing (Score)
 
@@ -27,3 +27,8 @@ name (Player state) =
 score : Player -> Score
 score (Player { trail }) =
     List.sum trail
+
+
+record : Score -> Player -> Player
+record newScore (Player state) =
+    Player { state | trail = newScore :: state.trail }

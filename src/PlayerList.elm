@@ -2,6 +2,7 @@ module PlayerList exposing
     ( PlayerList(..)
     , activePlayer
     , add
+    , addScore
     , empty
     , next
     , recycle
@@ -32,6 +33,16 @@ activePlayer list =
 
         PlayerList { current } ->
             Just current
+
+
+addScore : Score -> PlayerList -> PlayerList
+addScore score list =
+    case list of
+        EmptyList ->
+            EmptyList
+
+        PlayerList state ->
+            PlayerList { state | current = Player.record score state.current }
 
 
 empty : PlayerList

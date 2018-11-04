@@ -44,8 +44,8 @@ endTurn (Game state) =
 
 
 addHand : Hand -> Game -> Game
-addHand hand game =
-    game
+addHand hand (Game state) =
+    Game { state | players = PlayerList.addScore (Hand.toScore hand) state.players }
 
 
 playerList : Game -> List ( Player, Bool )
