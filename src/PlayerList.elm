@@ -1,5 +1,14 @@
-module PlayerList exposing (PlayerList(..), add, empty, next, toList)
+module PlayerList exposing
+    ( PlayerList(..)
+    , activePlayer
+    , add
+    , empty
+    , next
+    , recycle
+    , toList
+    )
 
+import Dice exposing (Score)
 import Player exposing (Player)
 
 
@@ -13,6 +22,16 @@ type alias State =
     , current : Player
     , nextList : List Player
     }
+
+
+activePlayer : PlayerList -> Maybe Player
+activePlayer list =
+    case list of
+        EmptyList ->
+            Nothing
+
+        PlayerList { current } ->
+            Just current
 
 
 empty : PlayerList
@@ -40,14 +59,28 @@ next list =
             PlayerList (nextState state)
 
 
-toList : PlayerList -> List Player
+toList : PlayerList -> List ( Player, Bool )
 toList list =
+    let
+        toTuple =
+            \p -> ( p, False )
+    in
     case list of
         EmptyList ->
             []
 
         PlayerList { prevList, current, nextList } ->
-            prevList ++ (current :: nextList)
+            List.map toTuple prevList ++ (( current, True ) :: List.map toTuple nextList)
+
+
+recycle : PlayerList -> PlayerList
+recycle list =
+    case list of
+        EmptyList ->
+            EmptyList
+
+        PlayerList state ->
+            PlayerList (recycleState state)
 
 
 

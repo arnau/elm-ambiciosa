@@ -2,11 +2,12 @@ module Main exposing (Model, Msg(..), init, main, subscriptions, update, view)
 
 import Browser
 import Dice exposing (Face(..))
+import Game exposing (Game(..))
 import Hand exposing (Hand)
 import Html exposing (..)
 import Html.Attributes as At
 import Html.Events exposing (..)
-import Player exposing (Player)
+import Player exposing (Player(..))
 import PlayerList exposing (PlayerList)
 import Random
 
@@ -30,6 +31,7 @@ main =
 
 type alias Model =
     { hand : Hand
+    , game : Game
     , players : PlayerList
     , playerInput : String
     }
@@ -38,6 +40,7 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { hand = Hand.empty
+      , game = Game.init PlayerList.empty
       , players = PlayerList.empty
       , playerInput = ""
       }
@@ -70,7 +73,7 @@ update msg model =
             )
 
         NewPlayer ->
-            ( { model | players = PlayerList.add (Player model.playerInput) model.players }
+            ( { model | game = Game.addPlayer model.playerInput model.game }
             , Cmd.none
             )
 
@@ -98,7 +101,7 @@ view model =
     div []
         [ handView model.hand
         , button [ onClick Roll ] [ text "Roll" ]
-        , playerListView model
+        , boardView model
         ]
 
 
@@ -119,19 +122,44 @@ handView hand =
         )
 
 
-playerListView : Model -> Html Msg
-playerListView model =
+boardView : Model -> Html Msg
+boardView model =
     div []
         [ input [ At.value model.playerInput, onInput InputPlayer ] []
         , button [ onClick NewPlayer ] [ text "Add player" ]
-        , playersView model.players
+        , scoreView model.game
         ]
 
 
-playersView : PlayerList -> Html Msg
-playersView list =
-    ul []
-        (list
-            |> PlayerList.toList
-            |> List.map (\player -> li [] [ text player.name ])
-        )
+scoreView : Game -> Html Msg
+scoreView game =
+    table []
+        [ thead []
+            [ th [] [ text "Name" ]
+            , th [] [ text "Score" ]
+            , th [] [ text "Active" ]
+            ]
+        , tbody [] (rowsView game)
+        ]
+
+
+rowsView : Game -> List (Html Msg)
+rowsView game =
+    game
+        |> Game.playerList
+        |> List.map
+            (\( player, active ) ->
+                tr []
+                    [ td [] [ text (Player.name player) ]
+                    , td [] [ text (String.fromInt (Player.score player)) ]
+                    , td []
+                        [ text
+                            (if active then
+                                "Active"
+
+                             else
+                                ""
+                            )
+                        ]
+                    ]
+            )
