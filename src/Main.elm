@@ -10,6 +10,7 @@ import Html.Events exposing (..)
 import Player exposing (Player(..))
 import PlayerList exposing (PlayerList)
 import Random
+import Turn exposing (Turn)
 
 
 
@@ -30,7 +31,7 @@ main =
 
 
 type alias Model =
-    { hand : Hand
+    { turn : Turn
     , game : Game
     , gameStarted : Bool
     , playerInput : String
@@ -39,7 +40,7 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { hand = Hand.empty
+    ( { turn = Turn.empty
       , game = Game.init PlayerList.empty
       , gameStarted = False
       , playerInput = ""
@@ -75,24 +76,20 @@ update msg model =
             )
 
         EndTurn ->
-            ( { model | game = Game.endTurn model.game, hand = Hand.empty }
+            let
+                game_ =
+                    Game.addTurn model.turn model.game
+            in
+            ( { model | game = Game.endTurn game_, turn = Turn.empty }
             , Cmd.none
             )
 
         NewHand newHand ->
-            let
-                game =
-                    Game.addHand newHand model.game
-            in
-            if Hand.toScore newHand == 0 then
-                ( { model | hand = Hand.empty, game = Game.endTurn game }
-                , Cmd.none
-                )
-
-            else
-                ( { model | hand = newHand, game = game }
-                , Cmd.none
-                )
+            ( { model
+                | turn = Turn.add newHand model.turn
+              }
+            , Cmd.none
+            )
 
         NewPlayer ->
             ( { model | game = Game.addPlayer model.playerInput model.game }
@@ -130,7 +127,7 @@ view model =
 ongoingView : Model -> Html Msg
 ongoingView model =
     div []
-        [ handView model.hand
+        [ turnView model
         , button [ onClick Roll ] [ text "Roll" ]
         , button [ onClick EndTurn ] [ text "End turn" ]
         , boardView model
@@ -147,21 +144,54 @@ setupView model =
         ]
 
 
-handView : Hand -> Html Msg
-handView hand =
+turnView : Model -> Html Msg
+turnView model =
+    let
+        playerName =
+            model.game
+                |> Game.activePlayer
+                |> Maybe.map Player.name
+                |> Maybe.withDefault "Anon"
+    in
     div [ At.style "font-size" "100px" ]
-        (case hand of
-            Hand.None ->
-                [ text "No hand" ]
+        (case model.turn of
+            Turn.Open [] ->
+                [ text playerName
+                , text " it is your turn"
+                ]
 
-            Hand.Hand a b c ->
-                [ text (Dice.toString a)
-                , text (Dice.toString b)
-                , text (Dice.toString c)
-                , text " = "
-                , text (String.fromInt (Hand.toScore hand))
+            Turn.Open (hand :: hands) ->
+                handView hand ++ totalTurnView model.turn
+
+            Turn.Closed [] ->
+                [ text "Empty closed" ]
+
+            Turn.Closed (hand :: hands) ->
+                [ div [ At.style "color" "tomato" ]
+                    (handView hand ++ totalTurnView model.turn)
                 ]
         )
+
+
+totalTurnView : Turn -> List (Html Msg)
+totalTurnView turn =
+    [ div [ At.style "font-size" "50px" ]
+        [ text " total ="
+        , text (String.fromInt (Turn.score turn))
+        ]
+    ]
+
+
+handView : Hand -> List (Html Msg)
+handView hand =
+    case hand of
+        Hand.Hand a b c ->
+            [ text (Dice.toString a)
+            , text (Dice.toString b)
+            , text (Dice.toString c)
+            , text " = "
+            , text (String.fromInt (Hand.toScore hand))
+            ]
 
 
 boardView : Model -> Html Msg

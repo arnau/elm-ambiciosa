@@ -1,10 +1,11 @@
 module Player exposing (Player, init, name, record, score)
 
 import Dice exposing (Score)
+import Turn exposing (Turn(..))
 
 
 type alias Trail =
-    List Score
+    List Turn
 
 
 type Player
@@ -26,17 +27,11 @@ name (Player state) =
 
 score : Player -> Score
 score (Player { trail }) =
-    let
-        sumif x acc =
-            if x >= 0 then
-                x + acc
-
-            else
-                x
-    in
-    List.foldr sumif 0 trail
+    trail
+        |> List.map Turn.score
+        |> List.sum
 
 
-record : Score -> Player -> Player
-record newScore (Player state) =
-    Player { state | trail = newScore :: state.trail }
+record : Turn -> Player -> Player
+record newTurn (Player state) =
+    Player { state | trail = newTurn :: state.trail }

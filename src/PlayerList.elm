@@ -2,15 +2,15 @@ module PlayerList exposing
     ( PlayerList(..)
     , activePlayer
     , add
-    , addScore
+    , addTurn
     , empty
     , next
     , recycle
     , toList
     )
 
-import Dice exposing (Score)
 import Player exposing (Player)
+import Turn exposing (Turn)
 
 
 type PlayerList
@@ -35,14 +35,14 @@ activePlayer list =
             Just current
 
 
-addScore : Score -> PlayerList -> PlayerList
-addScore score list =
+addTurn : Turn -> PlayerList -> PlayerList
+addTurn turn list =
     case list of
         EmptyList ->
             EmptyList
 
         PlayerList state ->
-            PlayerList { state | current = Player.record score state.current }
+            PlayerList { state | current = Player.record turn state.current }
 
 
 empty : PlayerList

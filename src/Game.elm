@@ -1,8 +1,8 @@
 module Game exposing
     ( Game(..)
     , activePlayer
-    , addHand
     , addPlayer
+    , addTurn
     , endTurn
     , init
     , playerList
@@ -13,6 +13,7 @@ import Dict exposing (Dict)
 import Hand exposing (Hand)
 import Player exposing (Player)
 import PlayerList exposing (PlayerList)
+import Turn exposing (Turn)
 
 
 type Game
@@ -43,9 +44,9 @@ endTurn (Game state) =
     Game { state | players = PlayerList.next state.players }
 
 
-addHand : Hand -> Game -> Game
-addHand hand (Game state) =
-    Game { state | players = PlayerList.addScore (Hand.toScore hand) state.players }
+addTurn : Turn -> Game -> Game
+addTurn turn (Game state) =
+    Game { state | players = PlayerList.addTurn turn state.players }
 
 
 playerList : Game -> List ( Player, Bool )

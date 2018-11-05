@@ -1,4 +1,4 @@
-module Hand exposing (Hand(..), empty, roll, toScore)
+module Hand exposing (Hand(..), roll, toScore)
 
 import Dice exposing (Face(..), Score)
 import Random
@@ -6,12 +6,6 @@ import Random
 
 type Hand
     = Hand Face Face Face
-    | None
-
-
-empty : Hand
-empty =
-    None
 
 
 roll : Random.Generator Hand
@@ -38,6 +32,3 @@ toScore hand =
             [ a, b, c ]
                 |> List.map Dice.toScore
                 |> List.sum
-
-        None ->
-            0
